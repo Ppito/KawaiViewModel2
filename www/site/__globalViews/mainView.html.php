@@ -4,114 +4,120 @@ global $g_options;
 
 $this->initializeParameter('string', 'title');
 $this->initializeParameter('string', 'body');
-$this->initializeParameterDefault('array', 'smallboxes', NULL);
-$this->initializeParameterDefault('bool', 'noPageTitle', FALSE);
-$this->initializeParameterDefault('bool', 'noFullText', FALSE);
-
+$this->initializeParameterDefault('array', 'smallboxes',  NULL);
+$this->initializeParameterDefault('bool',  'noPageTitle', FALSE);
+$this->initializeParameterDefault('bool',  'noFullText',  FALSE);
 
 $title = htmlspecialchars($this->title);
 
-$svnRev = '';
-$svnFile = ROOT_PATH.'/svn.txt';
-if (file_exists($svnFile))
-{
-	$svnRev = ' SVN r'.file_get_contents($svnFile);
-}
-
-echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-	<head>
-		<title><?php if (!$this->noPageTitle) echo $title . ' - '; ?>Kawaï Neko Box<?php echo $svnRev; ?></title>
+  <head>
+    <title><?php if (!$this->noPageTitle) echo $title . ' - '; ?>Ppito</title>
 
-		<script type="text/javascript">root_url = "<?php echo ROOT_URL; ?>";</script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase($g_options['jquery']['debug'] ? 'script/jquery.js' : 'script/jquery.min.js'); ?>"></script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase('script/jsrender.js'); ?>"></script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase('script/jquery.observable.js'); ?>"></script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase('script/jquery.views.js'); ?>"></script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase($g_options['bootstrap']['debug'] ? 'script/bootstrap.js' : 'script/bootstrap.min.js'); ?>"></script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase($g_options['bootstrap']['debug'] ? 'script/jquery.placeholder.js' : 'script/jquery.placeholder.min.js'); ?>"></script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase('script/knb.js'); ?>"></script>
-		
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase($g_options['bootstrap']['debug'] ? 'style/#SKIN#s/bootstrap.js' : 'style/#SKIN#s/bootstrap.min.js'); ?>"></script>
-		<script type='text/javascript' src="<?php echo $this->createUriFromBase($g_options['bootstrap']['debug'] ? 'style/#SKIN#s/bootstrap-responsive.js' : 'style/#SKIN#s/bootstrap-responsive.min.js'); ?>"></script>
-		<link rel="stylesheet" href="<?php echo $this->createUriFromBase('style/#SKIN#s/screen.css'); ?>" type="text/css" media="screen" />
-		<link rel="stylesheet" href="<?php echo $this->createUriFromBase('style/#SKIN#s/print.css'); ?>" type="text/css" media="print" />
-		<!--[if IE]>
-		<link rel="stylesheet" href="<?php echo $this->createUriFromBase('style/#SKIN#s/internet-explorer.css'); ?>" type="text/css" media="screen" />
-		<![endif]-->
-		<script type="text/javascript">
-			$(document).ready(function() {
-				$('input, textarea').placeholder();
-			});
-		</script>
-	</head>
-	<body>
-		<div id="bg-left"></div><div id="bg-right"></div>
-		<div id="header">
-			<div id="member">
-				<?php if ($g_user->isAnonymous()): ?>
-				<form id="loginform" action="<?php echo $this->createUriFromBase('login'); ?>" method="post" onsubmit="doLogin();return false;" >
-					Utilisateur :
-					<input id="login" name="login" type="text" />
-					Mot de passe :
-					<input id="password" name="password" type="password" />
-					<input id="submit_login" type="submit" value="Ok" />
-				</form>
-				<?php else: ?>
-				<div id="userbox">
-					Vous êtes connecté en tant que <strong><?php echo $g_user->getFullName(); ?></strong>.
-					<br />
-					<a href="<?php echo $this->createUriFromBase('logout'); ?>">Logout</a>
-				</div>
-				<?php endif; ?>
-			</div>
-		</div>
-		<div id="mainmenu">
-			<ul>
-				<li><a href="<?php echo $this->createUriFromBase('news'); ?>" style="background-image: url('<?php echo $this->createUriFromBase('img/#SKIN#/mainmenu-btn-news.png'); ?>')">News</a></li>
-				<li><a href="<?php echo $this->createUriFromBase('photos'); ?>" style="background-image: url('<?php echo $this->createUriFromBase('img/#SKIN#/mainmenu-btn-photos.png'); ?>')">Photos</a></li>
-			</ul>
-		</div>		
-		<div id="main">
-			<div id="submenu">
-				<?php
-					foreach($this->submenu as $title => $submenuContent)
-					{
-						echo "<h2>$title</h2>";
-						echo '<ul>';
-						foreach($submenuContent as $text => $link)
-						{
-							$link = $this->createUriFromModule($link);
-							echo "<li><a href='$link'>$text</a></li>";
-						}
-						echo '</ul>';
-					}
-				?>
-			</div>			
-			<div id="content">
-				<h1><?php echo $this->title; ?></h1>
-				<?php if (!$this->noFullText): ?>
-					<div id="fulltext"><?php echo $this->body; ?></div>
-				<?php else: 
-					echo $this->body;
-				endif; ?>
-			</div>
-		</div>
-		<div id="footer-bg">
-			<div id="footer">
-				Copyright © 2007 - <?php echo date('Y') ; ?> Kawai Neko Box - Tous droits réservés pour tous les pays
-			</div>
-		</div>
-<script type="text/javascript">
-			var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-			document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
-			var pageTracker = _gat._getTracker("UA-5031780-1");
-			pageTracker._initData();
-			pageTracker._trackPageview();
-</script>
-	</body>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"              />
+    <meta name="generator"          content="Ppito.fr - Developpement website"      />
+    <meta name="viewport"           content="width=device-width, initial-scale=1.0" />
+    
+    <link rel="shortcut icon" href="<?php echo $this->createUriFromBase('img/favicon.ico'); ?>" />
+
+    <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/bootstrap-responsive.css'); ?>" type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/bootstrap.css'); ?>"            type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/datepicker.css'); ?>"           type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/shadowbox.css'); ?>"            type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/buttons.css'); ?>"              type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/screen.css'); ?>"               type="text/css" media="screen" />
+    <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/print.css'); ?>"                type="text/css" media="print"  />
+    <!--[if IE]>
+      <link rel="stylesheet" href="<?php echo $this->createUriFromBase('styles/#SKIN#/internet-explorer.css'); ?>"  type="text/css" media="screen" />
+    <![endif]-->
+    
+    <script type="text/javascript">root_url = "<?php echo ROOT_URL; ?>";</script>
+    <script type="text/javascript" src="<?php echo $this->createUriFromBase('script/jquery.js'); ?>"                ></script>
+    <script type="text/javascript" src="<?php echo $this->createUriFromBase('script/shadowbox.js'); ?>"             ></script>
+    <script type="text/javascript" src="<?php echo $this->createUriFromBase('script/knb.js'); ?>"                   ></script>
+    <script type="text/javascript" src="<?php echo $this->createUriFromBase('script/bootstrap.js'); ?>"             ></script>
+    <script type="text/javascript" src="<?php echo $this->createUriFromBase('script/bootstrap-datepicker.js'); ?>"  ></script>
+    <script type="text/javascript" src="<?php echo $this->createUriFromBase('script/jquery.validate.js'); ?>"       ></script>
+  </head>
+  <body>
+    <header>
+      <div id="logo">
+        <a href="/">
+          <img src="/img/logo.png" alt="kvm" />
+        </a>
+      </div>
+      <div id="member" class="well well-small">
+        <?php if ($g_user->isAnonymous()): ?>
+          <form class="form-horizontal" id="loginform" action="<?php echo $this->createUriFromBase('login'); ?>" method="post" onsubmit="doLogin();return false;">
+            <label for="login">Utilisateur</label>
+            <input class="input-small" type="text" id="login" name="login" />
+            <label for="password">Mot de passe</label>
+            <input class="input-small" type="password" id="password" />
+            <input id="submit_login" type="submit" class="btn btn-mini" value="Ok" />
+          </form>
+        <?php else: ?>
+          <p>
+            Bienvenue <strong><?php echo $g_user->getLogin(); ?></strong>.
+            <br />
+            <a class="btn btn-mini" href="<?php echo $this->createUriFromBase('logout'); ?>">Logout</a>
+          </p>
+        <?php endif; ?>
+      </div>
+    </header>
+
+    <nav class="main">
+      <ul class="nav nav-tabs">
+      <?php foreach ($this->mainmenu as $title => $menu) : ?>
+        <li>
+          <a href="<?php echo $this->createUriFromModule($menu['link']); ?>"><?php echo $title; ?></a>
+        </li>
+      <?php endforeach; ?>
+     </ul>
+    </nav>
+    
+    <section class="main row-fluid">
+      <?php if (!empty($this->submenu)) : ?>
+      <aside class="submenu span3">
+        <nav class="sub">
+        <?php foreach ($this->submenu as $title => $submenuContent) : ?>
+          <h2><?php echo $title; ?></h2>
+          <ul class="nav nav-tabs nav-stacked">
+            <?php foreach ($submenuContent as $text => $menu) : ?>
+              <li>
+                <a href="<?php echo $this->createUriFromResource($menu['link']); ?>">
+                  <i class="icon-chevron-right"></i>
+                  <?php echo $text; ?>
+                </a>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        <?php endforeach; ?>
+        </nav>
+      </aside>
+      <?php endif; ?>
+
+      <section id="content"<?php if (empty($this->submenu)) echo ' style="width:963px"';?> class="well span9">
+        <h1><?php echo $this->title; ?></h1>
+        <?php if (!$this->noFullText): ?>
+        <div id="fulltext">
+          <?php echo $this->body; ?>
+        </div>
+        <?php else: echo $this->body; endif; ?>
+      </section>
+    </section>
+
+    <footer>
+      <p>Copyright © 2012 - <?php echo date('Y') ; ?> Ppito - Tous droits réservés pour tous les pays.</p>
+    </footer>
+    <script type="text/javascript">
+      function closeShadobox()    { setTimeout(function() { $(location).attr('href',"<?php echo $this->getCurrentUri();?>"); }, 100);}
+      function ShadowViewClose()  { Shadowbox.close(); }
+      Shadowbox.init({ modal: true, onClose: closeShadobox });
+      $(function(){
+        $('span').tooltip();
+      });
+    </script>
+  </body>
 </html>

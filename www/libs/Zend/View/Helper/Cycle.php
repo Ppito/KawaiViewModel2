@@ -1,34 +1,22 @@
 <?php
 /**
- * Zend Framework
+ * Zend Framework (http://framework.zend.com/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://framework.zend.com/license/new-bsd
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
- *
- * @category   Zend
- * @package    Zend_View
- * @subpackage Helper
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: Cycle.php 25024 2012-07-30 15:08:15Z rob $
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ * @package   Zend_View
  */
+
+namespace Zend\View\Helper;
 
 /**
  * Helper for alternating between set of values
  *
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_Cycle implements Iterator
+class Cycle extends AbstractHelper implements \Iterator
 {
 
     /**
@@ -42,33 +30,33 @@ class Zend_View_Helper_Cycle implements Iterator
      *
      * @var array
      */
-    protected $_pointers = array(self::DEFAULT_NAME =>-1) ;
+    protected $pointers = array(self::DEFAULT_NAME =>-1);
 
     /**
      * Array of values
      *
      * @var array
      */
-    protected $_data = array(self::DEFAULT_NAME=>array());
+    protected $data = array(self::DEFAULT_NAME=>array());
 
     /**
      * Actual name of cycle
      *
      * @var string
      */
-    protected $_name = self::DEFAULT_NAME;
+    protected $name = self::DEFAULT_NAME;
 
     /**
      * Add elements to alternate
      *
      * @param array $data
      * @param string $name
-     * @return Zend_View_Helper_Cycle
+     * @return \Zend\View\Helper\Cycle
      */
-    public function cycle(array $data = array(), $name = self::DEFAULT_NAME)
+    public function __invoke(array $data = array(), $name = self::DEFAULT_NAME)
     {
-        if(!empty($data))
-           $this->_data[$name] = $data;
+        if (!empty($data))
+           $this->data[$name] = $data;
 
         $this->setName($name);
         return $this;
@@ -79,12 +67,12 @@ class Zend_View_Helper_Cycle implements Iterator
      *
      * @param array $data
      * @param string $name
-     * @return Zend_View_Helper_Cycle
+     * @return \Zend\View\Helper\Cycle
      */
     public function assign(Array $data , $name = self::DEFAULT_NAME)
     {
         $this->setName($name);
-        $this->_data[$name] = $data;
+        $this->data[$name] = $data;
         $this->rewind();
         return $this;
     }
@@ -92,17 +80,17 @@ class Zend_View_Helper_Cycle implements Iterator
     /**
      * Sets actual name of cycle
      *
-     * @param string $name
-     * @return Zend_View_Helper_Cycle
+     * @param $name
+     * @return \Zend\View\Helper\Cycle
      */
     public function setName($name = self::DEFAULT_NAME)
     {
-       $this->_name = $name;
+       $this->name = $name;
 
-       if(!isset($this->_data[$this->_name]))
-         $this->_data[$this->_name] = array();
+       if (!isset($this->data[$this->name]))
+         $this->data[$this->name] = array();
 
-       if(!isset($this->_pointers[$this->_name]))
+       if (!isset($this->pointers[$this->name]))
          $this->rewind();
 
        return $this;
@@ -115,7 +103,7 @@ class Zend_View_Helper_Cycle implements Iterator
      */
     public function getName()
     {
-        return $this->_name;
+        return $this->name;
     }
 
 
@@ -126,7 +114,7 @@ class Zend_View_Helper_Cycle implements Iterator
      */
     public function getAll()
     {
-        return $this->_data[$this->_name];
+        return $this->data[$this->name];
     }
 
     /**
@@ -136,7 +124,7 @@ class Zend_View_Helper_Cycle implements Iterator
      */
     public function toString()
     {
-        return (string) $this->_data[$this->_name][$this->key()];
+        return (string) $this->data[$this->name][$this->key()];
     }
 
     /**
@@ -152,30 +140,30 @@ class Zend_View_Helper_Cycle implements Iterator
     /**
      * Move to next value
      *
-     * @return Zend_View_Helper_Cycle
+     * @return \Zend\View\Helper\Cycle
      */
     public function next()
     {
-        $count = count($this->_data[$this->_name]);
-        if ($this->_pointers[$this->_name] == ($count - 1))
-            $this->_pointers[$this->_name] = 0;
+        $count = count($this->data[$this->name]);
+        if ($this->pointers[$this->name] == ($count - 1))
+            $this->pointers[$this->name] = 0;
         else
-            $this->_pointers[$this->_name] = ++$this->_pointers[$this->_name];
+            $this->pointers[$this->name] = ++$this->pointers[$this->name];
         return $this;
     }
 
     /**
      * Move to previous value
      *
-     * @return Zend_View_Helper_Cycle
+     * @return \Zend\View\Helper\Cycle
      */
     public function prev()
     {
-        $count = count($this->_data[$this->_name]);
-        if ($this->_pointers[$this->_name] <= 0)
-            $this->_pointers[$this->_name] = $count - 1;
+        $count = count($this->data[$this->name]);
+        if ($this->pointers[$this->name] <= 0)
+            $this->pointers[$this->name] = $count - 1;
         else
-            $this->_pointers[$this->_name] = --$this->_pointers[$this->_name];
+            $this->pointers[$this->name] = --$this->pointers[$this->name];
         return $this;
     }
 
@@ -186,20 +174,20 @@ class Zend_View_Helper_Cycle implements Iterator
      */
     public function key()
     {
-        if ($this->_pointers[$this->_name] < 0)
+        if ($this->pointers[$this->name] < 0)
             return 0;
         else
-            return $this->_pointers[$this->_name];
+            return $this->pointers[$this->name];
     }
 
     /**
      * Rewind pointer
      *
-     * @return Zend_View_Helper_Cycle
+     * @return \Zend\View\Helper\Cycle
      */
     public function rewind()
     {
-        $this->_pointers[$this->_name] = -1;
+        $this->pointers[$this->name] = -1;
         return $this;
     }
 
@@ -210,7 +198,7 @@ class Zend_View_Helper_Cycle implements Iterator
      */
     public function valid()
     {
-        return isset($this->_data[$this->_name][$this->key()]);
+        return isset($this->data[$this->name][$this->key()]);
     }
 
     /**
@@ -220,6 +208,6 @@ class Zend_View_Helper_Cycle implements Iterator
      */
     public function current()
     {
-        return $this->_data[$this->_name][$this->key()];
+        return $this->data[$this->name][$this->key()];
     }
 }

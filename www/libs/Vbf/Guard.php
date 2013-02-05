@@ -1,7 +1,5 @@
 <?php
 
-require_once('Vbf/GuardProxy.php');
-
 class Vbf_Guard
 {	
 	public static function guardString($val, $func)

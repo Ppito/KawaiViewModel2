@@ -44,7 +44,8 @@ class Vbf_GuardProxy
 	
 	public function __isset($var)
 	{
-		throw new Exception('not supported');
+	 return isset($this->parameters[$var]);
+		//throw new Exception('not supported');
 	}
 }
 

@@ -19,24 +19,25 @@
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 
-/** Zend_Form_Element_Xhtml */
-require_once 'Zend/Form/Element/Xhtml.php';
+namespace Zend\Form\Element;
+
+use Zend\Form\Element;
 
 /**
- * Hidden form element
- *
  * @category   Zend
  * @package    Zend_Form
  * @subpackage Element
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Hidden.php 24593 2012-01-05 20:35:02Z matthew $
  */
-class Zend_Form_Element_Hidden extends Zend_Form_Element_Xhtml
+class Hidden extends Element
 {
     /**
-     * Use formHidden view helper by default
-     * @var string
+     * Seed attributes
+     *
+     * @var array
      */
-    public $helper = 'formHidden';
+    protected $attributes = array(
+        'type' => 'hidden',
+    );
 }

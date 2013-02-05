@@ -1,105 +1,196 @@
 <?php
 
-require_once('User.php');
+use Zend\Db\Sql\Select,
+    Zend\Db\Sql\Expression;
 
 /**
  * Store an user session, it is persisted on the user-side via cookies.
  */
-class Knb_ConnectedUser
-	extends Knb_User
+class Knb_ConnectedUser extends Knb_UserTable
 {
-	const COOKIE_NAME = 'session_id';
-	const COOKIE_EXPIRE_DAYS = 30;
-	private $sessionId;
-	
-	private static function getSessionIdFromCookie()
-	{
-		if (!array_key_exists(self::COOKIE_NAME, $_COOKIE)) return NULL;
-		else return $_COOKIE[self::COOKIE_NAME];
-	}
-	
-	private static function getUserFromSessionId($session_id)
-	{
-		if ($session_id == NULL) return -1; 
-		
-		$query = <<< EOD
-		SELECT *
-			FROM session
-			WHERE
-				session.session_key = ?
-EOD;
-		global $g_database;
-		$session_infos = $g_database->fetchRow($query, array($session_id));
-		
-		if ($session_infos == NULL) return -1;
-		
-		return $session_infos->user_id;
-	}
-	
-	public function __construct()
-	{
-		self::trimSessions();
-		$this->sessionId = self::getSessionIdFromCookie();
-		
-		parent::__construct(self::getUserFromSessionId($this->sessionId));
-	}
-	
-	private static function trimSessions()
-	{
-		$query = <<< EOD
-			DELETE
-				FROM session
-				WHERE DATE_ADD(session_start_timestamp, INTERVAL ? DAY) < now();
-EOD;
-		global $g_database;
-		$g_database->query($query, array(self::COOKIE_EXPIRE_DAYS));		
-	}
-	
-	private static function generateSessionKey()
-	{
-		return md5(uniqid(rand(), true));
-	}
-	
-	private static function createCookie($session_key)
-	{
-		setcookie(self::COOKIE_NAME, $session_key,
-			time() + 60*60*24*self::COOKIE_EXPIRE_DAYS, ROOT_URL);
-	}
-	
-	public static function login($login, $password)
-	{
-		self::trimSessions();
+  private $sessionId;
 
-		global $g_database;
-		$user_id = $g_database->fetchOne(
-			"SELECT user_id FROM user WHERE user_login = ? AND user_password_md5 = MD5(CONCAT(user_password_nonce, ?))",
-			array($login, $password));
-		
-		if ($user_id == NULL) throw new Exception("Invalid user name or password");
-		
-		$session_key = self::generateSessionKey();
-		
-		$g_database->query("INSERT INTO session (user_id, session_key) VALUES (?, ?)", array($user_id, $session_key));
-		
-		self::createCookie($session_key);
-	}
-	
-	public function logout()
-	{
-		if ($this->isAnonymous()) return;
+  private $user;
+  private $rights;
+  private $userId;
 
-		global $g_database;
-		$g_database->query("DELETE FROM session WHERE session_key = ?", array($this->sessionId));
-	}
-	
-	public function assertRight($right)
-	{
-		if (!$this->haveRight($right))
-		{
-			throw new Exception("You (".$this->getLoginForDisplay().") don't have the needed right to do this action : "
-				. self::getRightDescription($right));
-		}
-	}
+  public function __construct() {
+    parent::__construct();
+
+    $session = new Knb_SessionTable();
+    $session->clear();
+
+    $this->sessionId = Knb_Cookie::getSessionIdFromCookie();
+    $key             = $session->findOneBySessionKey($this->sessionId);
+    $this->userId    = $key['user_id'];
+    $this->rights    = NULL;
+
+    $this->updateUsers();
+  }
+
+  public static function login($login, $password) {
+
+    $sessionTable = new Knb_SessionTable();
+    $sessionTable->clear();
+
+    $userTable     = new Knb_UserTable();
+    $session_infos = $userTable->findOneByUserLoginAndUserPasswordMd5(
+      $login, 
+      new Expression('MD5(CONCAT(user_password_nonce, "'.$password.'"))')
+    );
+    
+    if ($session_infos === false) 
+      throw new Exception("Invalid user name or password");
+
+    $session_key = Knb_Cookie::generateSessionKey();
+    $user_id     = $session_infos['user_id'];
+
+    $session              = new Knb_Session();
+    $session->user_id     = $user_id;
+    $session->session_key = $session_key;
+    $sessionTable->saveSession($session);
+
+    Knb_Cookie::createCookie($session_key);
+  }
+
+  public function logout() {
+    if (!$this->isAnonymous()) {
+      $session = new Knb_SessionTable();
+      $session->delete(array('session_key' => $this->sessionId));
+      session_destroy();
+    }
+  }
+
+  public function updateUsers() {
+    if ($this->isAnonymous()) return;
+    $this->user = $this->findOneByUserId($this->userId);
+  }
+
+  public function getId() {
+    if ($this->isAnonymous()) return NULL;
+    return $this->userId; 
+  }
+
+  public function getLoginForDisplay() {
+    if ($this->isAnonymous()) return "Anonymous";
+    return $this->user->user_login;
+  }
+
+  public function getLogin() {
+    if ($this->isAnonymous()) return NULL;
+    return $this->user->user_login;
+  }
+
+  public function getBirthday() {
+    if ($this->isAnonymous()) return NULL;
+    return $this->user->user_birthday;
+  }
+
+  public function getMail() {
+    if ($this->isAnonymous()) return NULL;
+    return $this->user->user_mail;
+  }
+
+  public function getPhone() {
+    if ($this->isAnonymous()) return NULL;
+    return $this->user->user_phone;
+  }
+
+  public function getFullName() {
+    if ($this->isAnonymous()) return 'Anonymous';
+    return $this->user->user_last_name . ' ' . $this->user->user_first_name;
+  }
+
+  public function getFirstName() {
+    if ($this->isAnonymous()) return 'Anonymous';
+    return $this->user->user_first_name;
+  }
+
+  public function getLastName() {
+    if ($this->isAnonymous()) return 'Anonymous';
+    return $this->user->user_last_name;
+  }
+
+  public function isAnonymous() {
+    return ($this->userId === NULL);
+  }
+
+  private function ensureRightsLoaded() {
+    if ($this->rights == NULL) $this->updateRights();
+  }
+
+  /**
+   * Update the rights stored in this class from the database.
+   */
+  public function updateRights() {
+
+    $this->rights = array();
+    if (!$this->isAnonymous()) {
+      $id     = $this->userId;
+      $rights = array();
+
+      $dbRights = $this->select(function (Select $select) use ($id) {
+        $select
+          ->columns(array())
+          ->join(array('ug' => 'user__group'), 'ug.user_id = user.user_id', array())
+          ->join(array('g'  => 'group_'), 'g.group_id = ug.group_id', array())
+          ->join(array('gr' => 'group__right'), 'gr.group_id = g.group_id', array('value' => 'group__right_value'))
+          ->join(array('r'  => 'right_'), 'r.right_id = gr.right_id', array('name'  => 'right_name'))
+          ->where(array(
+            'r.is_deleted'    => 0,
+            'user.is_deleted' => 0,
+            'g.is_deleted'    => 0,
+            'user.user_id'    => $id
+          ));
+      });
+      
+      foreach ($dbRights as $dbRight) {
+        $value = ($dbRight->value === 'allow');
+        if (!array_key_exists($dbRight->name, $rights)) {
+          $rights[$dbRight->name] = $value;
+        } else if ($rights[$dbRight->name] && ($value === false)) {
+          $rights[$dbRight->name] = false;
+        }
+      }
+
+      $this->rights = array_keys(array_filter($rights));
+    }
+  }
+  
+  public function assertRight($rightName) {
+    if (!$this->haveRight($rightName)) {
+      
+      $rightTable = new Knb_RightTable();
+      $right      = $rightTable->findOneByRightName($rightName);
+      throw new Vbf_Mvc_Exception404("You (".$this->getLoginForDisplay().") don't have the needed right to do this action : " . $right['right_description']);
+    }
+  }
+
+  public function getRights() {
+    $this->ensureRightsLoaded();
+    return $this->rights;
+  }
+
+  public function haveRight($right)
+  {
+    $this->ensureRightsLoaded();
+    $rights = !is_array($right) ? array($right) : $right;
+    foreach ($rights as $value) {
+      if (!in_array($value, $this->rights))
+        return false;
+    }
+    return true;
+  }
+  
+  public function haveOneRight($rights) {
+    $this->ensureRightsLoaded();
+    $rights = !is_array($right) ? array($right) : $right;
+    foreach ($rights as $value) {
+      if (!in_array($value, $this->rights))
+        return true;
+    }
+    return false;
+  }
 }
 
 ?>

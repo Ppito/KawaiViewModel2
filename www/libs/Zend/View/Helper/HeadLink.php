@@ -1,70 +1,45 @@
 <?php
 /**
- * Zend Framework
+ * Zend Framework (http://framework.zend.com/)
  *
- * LICENSE
- *
- * This source file is subject to the new BSD license that is bundled
- * with this package in the file LICENSE.txt.
- * It is also available through the world-wide-web at this URL:
- * http://framework.zend.com/license/new-bsd
- * If you did not receive a copy of the license and are unable to
- * obtain it through the world-wide-web, please send an email
- * to license@zend.com so we can send you a copy immediately.
- *
- * @category   Zend
- * @package    Zend_View
- * @subpackage Helper
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @version    $Id: HeadLink.php 24858 2012-06-01 01:24:17Z adamlundrigan $
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ * @package   Zend_View
  */
 
-/** Zend_View_Helper_Placeholder_Container_Standalone */
-require_once 'Zend/View/Helper/Placeholder/Container/Standalone.php';
+namespace Zend\View\Helper;
+
+use stdClass;
+use Zend\View;
+use Zend\View\Exception;
 
 /**
  * Zend_Layout_View_Helper_HeadLink
  *
  * @see        http://www.w3.org/TR/xhtml1/dtds.html
- * @uses       Zend_View_Helper_Placeholder_Container_Standalone
  * @package    Zend_View
  * @subpackage Helper
- * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_Standalone
+class HeadLink extends Placeholder\Container\AbstractStandalone
 {
     /**
-     * $_validAttributes
+     * $validAttributes
      *
      * @var array
      */
-    protected $_itemKeys = array(
-        'charset',
-        'href',
-        'hreflang',
-        'id',
-        'media',
-        'rel',
-        'rev',
-        'type',
-        'title',
-        'extras',
-        'sizes',
-    );
+    protected $itemKeys = array('charset', 'href', 'hreflang', 'id', 'media', 'rel', 'rev', 'type', 'title', 'extras');
 
     /**
      * @var string registry key
      */
-    protected $_regKey = 'Zend_View_Helper_HeadLink';
+    protected $regKey = 'Zend_View_Helper_HeadLink';
 
     /**
      * Constructor
      *
      * Use PHP_EOL as separator
      *
-     * @return void
      */
     public function __construct()
     {
@@ -78,20 +53,22 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * Returns current object instance. Optionally, allows passing array of
      * values to build link.
      *
-     * @return Zend_View_Helper_HeadLink
+     * @param array $attributes
+     * @param string $placement
+     * @return \Zend\View\Helper\HeadLink
      */
-    public function headLink(array $attributes = null, $placement = Zend_View_Helper_Placeholder_Container_Abstract::APPEND)
+    public function __invoke(array $attributes = null, $placement = Placeholder\Container\AbstractContainer::APPEND)
     {
         if (null !== $attributes) {
             $item = $this->createData($attributes);
             switch ($placement) {
-                case Zend_View_Helper_Placeholder_Container_Abstract::SET:
+                case Placeholder\Container\AbstractContainer::SET:
                     $this->set($item);
                     break;
-                case Zend_View_Helper_Placeholder_Container_Abstract::PREPEND:
+                case Placeholder\Container\AbstractContainer::PREPEND:
                     $this->prepend($item);
                     break;
-                case Zend_View_Helper_Placeholder_Container_Abstract::APPEND:
+                case Placeholder\Container\AbstractContainer::APPEND:
                 default:
                     $this->append($item);
                     break;
@@ -134,6 +111,7 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * @param mixed $method
      * @param mixed $args
      * @return void
+     * @throws Exception\BadMethodCallException
      */
     public function __call($method, $args)
     {
@@ -151,10 +129,10 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
             }
 
             if (1 > $argc) {
-                require_once 'Zend/View/Exception.php';
-                $e =  new Zend_View_Exception(sprintf('%s requires at least one argument', $method));
-                $e->setView($this->view);
-                throw $e;
+                throw new Exception\BadMethodCallException(sprintf(
+                    '%s requires at least one argument',
+                    $method
+                 ));
             }
 
             if (is_array($args[0])) {
@@ -184,7 +162,7 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * @param  mixed $value
      * @return boolean
      */
-    protected function _isValid($value)
+    protected function isValid($value)
     {
         if (!$value instanceof stdClass) {
             return false;
@@ -192,7 +170,7 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
 
         $vars         = get_object_vars($value);
         $keys         = array_keys($vars);
-        $intersection = array_intersect($this->_itemKeys, $keys);
+        $intersection = array_intersect($this->itemKeys, $keys);
         if (empty($intersection)) {
             return false;
         }
@@ -205,14 +183,14 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      *
      * @param  array $value
      * @return void
+     * @throws Exception\InvalidArgumentException
      */
     public function append($value)
     {
-        if (!$this->_isValid($value)) {
-            require_once 'Zend/View/Exception.php';
-            $e = new Zend_View_Exception('append() expects a data token; please use one of the custom append*() methods');
-            $e->setView($this->view);
-            throw $e;
+        if (!$this->isValid($value)) {
+            throw new Exception\InvalidArgumentException(
+                'append() expects a data token; please use one of the custom append*() methods'
+            );
         }
 
         return $this->getContainer()->append($value);
@@ -224,14 +202,14 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * @param  string|int $index
      * @param  array $value
      * @return void
+     * @throws Exception\InvalidArgumentException
      */
     public function offsetSet($index, $value)
     {
-        if (!$this->_isValid($value)) {
-            require_once 'Zend/View/Exception.php';
-            $e = new Zend_View_Exception('offsetSet() expects a data token; please use one of the custom offsetSet*() methods');
-            $e->setView($this->view);
-            throw $e;
+        if (!$this->isValid($value)) {
+            throw new Exception\InvalidArgumentException(
+                'offsetSet() expects a data token; please use one of the custom offsetSet*() methods'
+            );
         }
 
         return $this->getContainer()->offsetSet($index, $value);
@@ -241,15 +219,15 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * prepend()
      *
      * @param  array $value
-     * @return Zend_Layout_ViewHelper_HeadLink
+     * @return HeadLink
+     * @throws Exception\InvalidArgumentException
      */
     public function prepend($value)
     {
-        if (!$this->_isValid($value)) {
-            require_once 'Zend/View/Exception.php';
-            $e = new Zend_View_Exception('prepend() expects a data token; please use one of the custom prepend*() methods');
-            $e->setView($this->view);
-            throw $e;
+        if (!$this->isValid($value)) {
+            throw new Exception\InvalidArgumentException(
+                'prepend() expects a data token; please use one of the custom prepend*() methods'
+            );
         }
 
         return $this->getContainer()->prepend($value);
@@ -259,15 +237,15 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * set()
      *
      * @param  array $value
-     * @return Zend_Layout_ViewHelper_HeadLink
+     * @return HeadLink
+     * @throws Exception\InvalidArgumentException
      */
     public function set($value)
     {
-        if (!$this->_isValid($value)) {
-            require_once 'Zend/View/Exception.php';
-            $e = new Zend_View_Exception('set() expects a data token; please use one of the custom set*() methods');
-            $e->setView($this->view);
-            throw $e;
+        if (!$this->isValid($value)) {
+            throw new Exception\InvalidArgumentException(
+                'set() expects a data token; please use one of the custom set*() methods'
+            );
         }
 
         return $this->getContainer()->set($value);
@@ -283,27 +261,27 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
     public function itemToString(stdClass $item)
     {
         $attributes = (array) $item;
-        $link       = '<link ';
+        $link       = '<link';
 
-        foreach ($this->_itemKeys as $itemKey) {
+        foreach ($this->itemKeys as $itemKey) {
             if (isset($attributes[$itemKey])) {
-                if(is_array($attributes[$itemKey])) {
-                    foreach($attributes[$itemKey] as $key => $value) {
-                        $link .= sprintf('%s="%s" ', $key, ($this->_autoEscape) ? $this->_escape($value) : $value);
+                if (is_array($attributes[$itemKey])) {
+                    foreach ($attributes[$itemKey] as $key => $value) {
+                        $link .= sprintf(' %s="%s"', $key, ($this->autoEscape) ? $this->escape($value) : $value);
                     }
                 } else {
-                    $link .= sprintf('%s="%s" ', $itemKey, ($this->_autoEscape) ? $this->_escape($attributes[$itemKey]) : $attributes[$itemKey]);
+                    $link .= sprintf(' %s="%s"', $itemKey, ($this->autoEscape) ? $this->escape($attributes[$itemKey]) : $attributes[$itemKey]);
                 }
             }
         }
 
-        if ($this->view instanceof Zend_View_Abstract) {
-            $link .= ($this->view->doctype()->isXhtml()) ? '/>' : '>';
+        if (method_exists($this->view, 'plugin')) {
+            $link .= ($this->view->plugin('doctype')->isXhtml()) ? ' />' : '>';
         } else {
-            $link .= '/>';
+            $link .= ' />';
         }
 
-        if (($link == '<link />') || ($link == '<link >')) {
+        if (($link == '<link />') || ($link == '<link>')) {
             return '';
         }
 
@@ -335,7 +313,7 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
             $items[] = $this->itemToString($item);
         }
 
-        return $indent . implode($this->_escape($this->getSeparator()) . $indent, $items);
+        return $indent . implode($this->escape($this->getSeparator()) . $indent, $items);
     }
 
     /**
@@ -354,7 +332,7 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * Create item for stylesheet link item
      *
      * @param  array $args
-     * @return stdClass|false Returns fals if stylesheet is a duplicate
+     * @return stdClass|false Returns false if stylesheet is a duplicate
      */
     public function createDataStylesheet(array $args)
     {
@@ -364,13 +342,13 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
         $conditionalStylesheet = false;
         $href                  = array_shift($args);
 
-        if ($this->_isDuplicateStylesheet($href)) {
+        if ($this->isDuplicateStylesheet($href)) {
             return false;
         }
 
         if (0 < count($args)) {
             $media = array_shift($args);
-            if(is_array($media)) {
+            if (is_array($media)) {
                 $media = implode(',', $media);
             } else {
                 $media = (string) $media;
@@ -378,20 +356,20 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
         }
         if (0 < count($args)) {
             $conditionalStylesheet = array_shift($args);
-            if(!empty($conditionalStylesheet) && is_string($conditionalStylesheet)) {
+            if (!empty($conditionalStylesheet) && is_string($conditionalStylesheet)) {
                 $conditionalStylesheet = (string) $conditionalStylesheet;
             } else {
                 $conditionalStylesheet = null;
             }
         }
 
-        if(0 < count($args) && is_array($args[0])) {
+        if (0 < count($args) && is_array($args[0])) {
             $extras = array_shift($args);
             $extras = (array) $extras;
         }
 
         $attributes = compact('rel', 'type', 'href', 'media', 'conditionalStylesheet', 'extras');
-        return $this->createData($this->_applyExtras($attributes));
+        return $this->createData($attributes);
     }
 
     /**
@@ -400,7 +378,7 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      * @param  string $uri
      * @return bool
      */
-    protected function _isDuplicateStylesheet($uri)
+    protected function isDuplicateStylesheet($uri)
     {
         foreach ($this->getContainer() as $item) {
             if (($item->rel == 'stylesheet') && ($item->href == $uri)) {
@@ -415,14 +393,15 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
      *
      * @param  array $args
      * @return stdClass
+     * @throws Exception\InvalidArgumentException
      */
     public function createDataAlternate(array $args)
     {
         if (3 > count($args)) {
-            require_once 'Zend/View/Exception.php';
-            $e = new Zend_View_Exception(sprintf('Alternate tags require 3 arguments; %s provided', count($args)));
-            $e->setView($this->view);
-            throw $e;
+            throw new Exception\InvalidArgumentException(sprintf(
+                'Alternate tags require 3 arguments; %s provided',
+                count($args)
+            ));
         }
 
         $rel   = 'alternate';
@@ -430,11 +409,11 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
         $type  = array_shift($args);
         $title = array_shift($args);
 
-        if(0 < count($args) && is_array($args[0])) {
+        if (0 < count($args) && is_array($args[0])) {
             $extras = array_shift($args);
             $extras = (array) $extras;
 
-            if(isset($extras['media']) && is_array($extras['media'])) {
+            if (isset($extras['media']) && is_array($extras['media'])) {
                 $extras['media'] = implode(',', $extras['media']);
             }
         }
@@ -444,24 +423,6 @@ class Zend_View_Helper_HeadLink extends Zend_View_Helper_Placeholder_Container_S
         $title = (string) $title;
 
         $attributes = compact('rel', 'href', 'type', 'title', 'extras');
-        return $this->createData($this->_applyExtras($attributes));
-    }
-
-    /**
-     * Apply any overrides specified in the 'extras' array
-     * @param array $attributes
-     * @return array
-     */
-    protected function _applyExtras($attributes)
-    {
-        if (isset($attributes['extras'])) {
-            foreach ($attributes['extras'] as $eKey=>$eVal) {
-                if (isset($attributes[$eKey])) {
-                    $attributes[$eKey] = $eVal;
-                    unset($attributes['extras'][$eKey]);
-                }
-            }
-        }
-        return $attributes;
+        return $this->createData($attributes);
     }
 }
