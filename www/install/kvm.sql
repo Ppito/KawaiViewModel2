@@ -17,10 +17,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Base de données: `kvm`
+-- Base de données: `kvm2`
 --
-CREATE DATABASE `kvm` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-USE `kvm`;
+CREATE DATABASE `kvm2` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+USE `kvm2`;
 
 -- --------------------------------------------------------
 
@@ -152,9 +152,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`user_id`, `user_login`, `user_last_name`, `user_first_name`, `user_birthday`, `user_sexe`, `user_mail`, `user_phone`, `user_password_nonce`, `user_password_md5`, `is_deleted`, `user_creation`) VALUES
-(1, 'Ppito', 'Kvm', 'Ppito', '1970-01-01', 0, 'Ppito91@gmail.com', '0123456789', 57646, MD5('57646Ppito'), 0, NOW()),
-(2, 'kuroneko', 'Kvm','Kuroneko', '1970-01-01', 0, 'kuroneko@kawai-neko-box.fr', '0123456789', 381478, MD5('381478rigesamelia'), 0, NOW()),
-(3, 'orenjineko', 'Kvm',  'Orenjineko', '1970-01-01', 0, 'orenjineko@kawai-neko-box.fr', '0123456789', 9474657, MD5('9474657vbfox'), 0, NOW());
+(1, 'kvm2', 'Kvm2', 'Kvm2', '1970-01-01', 0, 'Kvm2@Kvm2', '0123456789', 57646, MD5('57646kvm2'), 0, NOW());
 -- --------------------------------------------------------
 
 --
@@ -173,9 +171,7 @@ CREATE TABLE IF NOT EXISTS `user__group` (
 --
 
 INSERT INTO `user__group` (`user_id`, `group_id`) VALUES
-(1, 1),
-(2, 1),
-(3, 1);
+(1, 1);
 
 --
 -- Contraintes pour les tables exportées

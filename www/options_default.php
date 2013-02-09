@@ -58,6 +58,6 @@ $g_options['db']['port']     = '3306';
 $g_options['db']['hostname'] = '127.0.0.1';
 $g_options['db']['username'] = 'user';
 $g_options['db']['password'] = '';
-$g_options['db']['database'] = 'database';
+$g_options['db']['database'] = 'Kvm2';
 
 ?>
