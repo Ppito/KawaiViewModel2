@@ -1,11 +1,12 @@
 - Portage to zend Framework 2 finish
 
 ----------------------------------------------------------------------------------------------
-
-Copyright (c) 2010, Luc Fasquelle <mail@riges.net> 
-Copyright (c) 2010, Julien RONCAGLIA <julien@roncaglia.fr> 
-Copyright (c) 2013, Mickael Tonnelier <tonnelier.mickael@gmail.com> 
+<pre>
+Copyright (c) 2010, <a href="mailto:mail@riges.net">Luc Fasquelle </a>
+Copyright (c) 2010, <a href="mailto:julien@roncaglia.fr">Julien RONCAGLIA</a>
+Copyright (c) 2013, <a href="mailto:tonnelier.mickael@gmail.com">Mickael Tonnelier</a>
 All rights reserved.
+</pre>
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
